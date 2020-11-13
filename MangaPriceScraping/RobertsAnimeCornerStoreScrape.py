@@ -1,5 +1,6 @@
 #
 
+from msedge.selenium_tools import Edge, EdgeOptions
 from bs4 import BeautifulSoup
 import string
 import csv
@@ -28,7 +29,7 @@ def getURL(title, nextPage):
                 url = R"https://www.animecornerstore.com/{}.html".format(list(urlMapDict.keys())[valueList.index(letters)])
                 print(url)
                 return url
-    else: #Gets the actual page data will be scraped from
+    else: #Gets the actual page that houses the data that will be scraped from
         url = R"https://www.animecornerstore.com/{}".format(title)
         print(url)
         return url
@@ -56,7 +57,14 @@ def getDataPage(driver, title, soup):
         return False
 
 #Main logic function that uses the input and scrapes the data into a csv file
-def getRobertsAnimeCornerStoreData(driver, title):
+def getRobertsAnimeCornerStoreData(title):
+    #Starts wevdriver to scrape edge chromium
+    options = EdgeOptions()
+    options.use_chromium = True
+    options.add_argument("-inprivate")
+    options.add_argument("--headless")
+    driver = Edge(options=options)
+    
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     newPage = getDataPage(driver, title, soup)

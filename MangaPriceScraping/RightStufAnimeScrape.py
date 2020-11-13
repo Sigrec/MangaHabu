@@ -1,5 +1,6 @@
 #Scrapes the RightStufAnime website for a manga or light novel series and prints the stock stats, title, and current price
 
+from msedge.selenium_tools import Edge, EdgeOptions
 from bs4 import BeautifulSoup
 from natsort import natsorted
 import string
@@ -43,7 +44,14 @@ def getPageURL(bookType, currPageNum, bookTitle):
     return pageURL
     
 #Main logic function that does all the scraping and formats data into a csv
-def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
+def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
+    #Starts wevdriver to scrape edge chromium
+    options = EdgeOptions()
+    options.use_chromium = True
+    options.add_argument("-inprivate")
+    options.add_argument("--headless")
+    driver = Edge(options=options)
+    
     #Create a empty list for all the data types we want to track
     titleList, priceList, stockStatusList = [], [], []
 
@@ -83,7 +91,7 @@ def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
         #Check to see if there is another page
         if nextPageButton != None:
             currPageNum += 1
-            getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum)
+            getRightStufAnimeData(memberStatus, title, bookType, currPageNum)
             
     #Initialize the a CSV to write into w/ appropiate headers
     csvFile = websiteName + "Data.csv"
