@@ -1,10 +1,8 @@
 # MangaHabu
 Website designed for Manga/Light Novel collectors in mind!
 
-A side project I decided to do to start learning web scraping and using dif APIs in general as well as web dev stuff.
+A side project I decided to do to start learning web scraping and using dif APIs in general as well as web dev stuff. Also to get better at Python and JS Frameworks
 
 
 MangaHabu V1
-- Tool to Scrape RightStufAnime, Amazon, Barnes & Noble, and Book Depository for Manga and Light Novel data, then compares prices for each volume and outputs a list of all the volumes for the specified series with there data. Specifically the url and data for the volume from the website that has the lowest price.
-
-Done in python at first to familizarize myself with the logic and practice python
+- Scrape RightStufAnime and Robert's Anime Corner Store for manga and light novel data of a particular series that is given by the user. Then compare the data and ouput all of the volumes with there title, price, and website to a CSV file for the lowest volume prices

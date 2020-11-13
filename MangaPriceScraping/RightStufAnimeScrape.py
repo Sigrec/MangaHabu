@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 from natsort import natsorted
-import re
+import string
 import csv
 import time
 
@@ -32,7 +32,7 @@ def checkBookType(bookType):
 
 #Converts the title give n into a valid string that will create a valid url for RightStu
 def filterTitle(bookTitle):
-    for char in ["'", "!", " "]: #Common non alphanumeric characters used in Light Novel & Manga titles
+    for char in [" ", "'", "!"]: #Common non alphanumeric characters used in Light Novel & Manga titles
         if char in bookTitle:
             bookTitle = bookTitle.replace(char, "%" + hex(ord(char)).replace("0x", ""))
     return bookTitle
