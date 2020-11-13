@@ -1,7 +1,6 @@
 #
 
 from bs4 import BeautifulSoup
-from natsort import natsorted
 import string
 import csv
 import time
@@ -74,16 +73,25 @@ def getRobertsAnimeCornerStoreData(driver, title):
         soup2 = BeautifulSoup(driver.page_source, "html.parser")
         
         #Get the Title and Price of each manga or light novel
-        dataList = []
+        dataList, titleList = [], []
         websiteName = "AnimeCornerStore"
         titleParse = soup2.find_all("tr", {"valign" :"top"})[1:] #Remove first element cause it pulls unwanted text
-        priceParse = soup2.select('font[color="#ffcc33"]')[1::2] #[1::2] to remove the RACS Price text (every odd element in the list)
-        for titles, prices in zip(titleParse, priceParse):
-            dataList.append([titles.find("font", {"size" : "2"}).b.text, prices.text, websiteName])
+        priceList = soup2.select('font[color="#ffcc33"]')[1::2] #[1::2] to remove the RACS Price text (every odd element in the list)
+        
+        #Convert title list to strings so you can remove any black/empyt spaces
+        for bookTitle in titleParse:
+            seriesTitle = bookTitle.find("font", {"size" : "2"}).b.text
+            if seriesTitle != " ":
+                titleList.append(seriesTitle)
+        titleParse.clear() #Remove list from memory as we don't need it anymore
+        
+        #print("Title List Length: " + str(len(titleList)) + "\nPrice List Length: " + str(len(priceList)))
+        for titles, prices in zip(titleList, priceList):
+            dataList.append([titles, prices.text, websiteName])
 
         csvFile = websiteName + ".csv"
         with open(csvFile, "w", newline = "", encoding = "utf-8") as file:
             writeToFile = csv.writer(file)
             writeToFile.writerow(["Title", "Price", "Website"])
-            writeToFile.writerows(natsorted(dataList))
+            writeToFile.writerows(dataList)
         return csvFile

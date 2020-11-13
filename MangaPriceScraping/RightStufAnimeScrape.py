@@ -6,9 +6,8 @@ import string
 import csv
 import time
 
-#Create a empty list for all the data types we want to track
-titleList, priceList, stockStatusList, dataFile = [], [], [], []
-newPage = False
+#Empty list that holds final data
+dataFile = []
 
 #Checks to see if whether to user is a GotAnime member
 def checkMembershipStatus(membershipStatus):
@@ -38,19 +37,18 @@ def filterTitle(bookTitle):
     return bookTitle
 
 #Gets the URL to for the Light Novel or Manga the user wants
-def getPageURL(bookType, currPageNum, bookTitle, newPage):
-    if not newPage:
-        pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(checkBookType(bookType), currPageNum, filterTitle(bookTitle))
-    elif newPage and currPageNum > 1:
-        pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(bookType, currPageNum, bookTitle)
+def getPageURL(bookType, currPageNum, bookTitle):
+    pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(checkBookType(bookType), currPageNum, filterTitle(bookTitle))
     print(pageURL)
     return pageURL
     
 #Main logic function that does all the scraping and formats data into a csv
 def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
+    #Create a empty list for all the data types we want to track
+    titleList, priceList, stockStatusList = [], [], []
+
     #Get the URL for the page we are going to scrape for data
-    global newPage
-    driver.get(getPageURL(bookType, currPageNum, title, newPage))
+    driver.get(getPageURL(bookType, currPageNum, title))
     
     #Need to wait so the website can finish loading
     time.sleep(10)
@@ -59,11 +57,11 @@ def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
     #Get the Title, Price, and Stock Status Data of each Manga Volume and whether or not next page button exists
-    titleList.extend(soup.find_all("span", {"itemprop" : "name"}))
-    priceList.extend(soup.find_all("span", {"itemprop" : "price"}))
-    stockStatusList.extend(soup.find_all("div", {"class" : "product-line-stock-container"}))
+    titleList = soup.find_all("span", {"itemprop" : "name"})
+    priceList = soup.find_all("span", {"itemprop" : "price"})
+    stockStatusList = soup.find_all("div", {"class" : "product-line-stock-container"})
     nextPageButton = soup.find("li", {"class" : "global-views-pagination-next"})
-
+    
     #Check to see if the title given by the user generates a valid URL for RightStufAnime
     if not titleList:
         print("Error!!! Invalid Title, Use English Title Variant w/ Approprate Spacing & Capitalization")
@@ -72,6 +70,7 @@ def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
         websiteName = "RightStufAnime"
         gotAnimeDiscount = 0.05 #5% Manga discount
         
+        #Format data into a single list
         for fullTitle, price, stockStatus in zip(titleList, priceList, stockStatusList): #get only the title and volume number for the series we are looking for
             if fullTitle.text.replace(" ", "").lower().find(title.replace(" ", "").lower()) != -1: #Fixes issue with capitilization
                 if memberStatus: #If user is a member add discount
@@ -80,7 +79,7 @@ def getRightStufAnimeData(driver, memberStatus, title, bookType, currPageNum):
                 else:
                     priceText = price.text
                 dataFile.append([fullTitle.text, stockStatus.text, priceText, websiteName])
-
+                
         #Check to see if there is another page
         if nextPageButton != None:
             currPageNum += 1
