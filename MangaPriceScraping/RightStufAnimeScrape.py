@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from natsort import natsorted
 import string
 import csv
+import re
 import time
 
 #Empty list that holds final data
@@ -32,7 +33,7 @@ def checkBookType(bookType):
 
 #Converts the title give n into a valid string that will create a valid url for RightStu
 def filterTitle(bookTitle):
-    for char in [" ", "'", "!"]: #Common non alphanumeric characters used in Light Novel & Manga titles
+    for char in [" ", "'", "!", "-"]: #Common non alphanumeric characters used in Light Novel & Manga titles
         if char in bookTitle:
             bookTitle = bookTitle.replace(char, "%" + hex(ord(char)).replace("0x", ""))
     return bookTitle
@@ -42,7 +43,11 @@ def getPageURL(bookType, currPageNum, bookTitle):
     pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(checkBookType(bookType), currPageNum, filterTitle(bookTitle))
     print(pageURL)
     return pageURL
-    
+
+#Removes spacing and lowercases all letters
+def deParseString(title):
+    return re.sub(r"\W+", "", title.lower()) 
+
 #Main logic function that does all the scraping and formats data into a csv
 def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
     #Starts wevdriver to scrape edge chromium
@@ -80,7 +85,7 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
         
         #Format data into a single list
         for fullTitle, price, stockStatus in zip(titleList, priceList, stockStatusList): #get only the title and volume number for the series we are looking for
-            if fullTitle.text.replace(" ", "").lower().find(title.replace(" ", "").lower()) != -1: #Fixes issue with capitilization
+            if deParseString(title) in deParseString(fullTitle.text): #Fixes issue with capitilization
                 if memberStatus: #If user is a member add discount
                     priceVal = float(price.text[1:])
                     priceText = "$" + str(round((priceVal - (priceVal * gotAnimeDiscount)), 2)) #Add discount

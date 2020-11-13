@@ -4,6 +4,7 @@ from msedge.selenium_tools import Edge, EdgeOptions
 from bs4 import BeautifulSoup
 import string
 import csv
+import re
 import time
 
 #Gets the URLs needed to scrape the data from using the user input series title
@@ -25,7 +26,7 @@ def getURL(title, nextPage):
         firstLetter = title[0]
         valueList = list(urlMapDict.values())
         for letters in valueList:
-            if firstLetter.lower() in ''.join(letters):
+            if (firstLetter.lower() in ''.join(letters)) or (not firstLetter.isalpha()):
                 url = R"https://www.animecornerstore.com/{}.html".format(list(urlMapDict.keys())[valueList.index(letters)])
                 print(url)
                 return url
@@ -36,12 +37,12 @@ def getURL(title, nextPage):
 
 #Removes spacing and lowercases all letters
 def deParseString(title):
-    return title.lower().replace(" ", "") 
+    return re.sub(r"\W+", "", title.lower()) 
 
-def getDataPage(driver, title, soup):
+def getDataPage(driver, title, soup, bookType):
     #Gets the page to find the URL to scrape the data
     driver.get(getURL(title, False))
-    
+        
     #Wait for the page to load
     time.sleep(5)
     
@@ -51,13 +52,18 @@ def getDataPage(driver, title, soup):
     #Finds the correct url where the data will be scraped
     findSeries = soup.find_all("a", href=True)[1::2][:-19] #[1::2][:-19] Removes all none titles
     for series in findSeries:
-        if deParseString(title) in deParseString(series.text): #Checks to see if the series is being sold by the store
-            return getURL(series["href"], True)
-    else:
-        return False
+        webPageTitle = deParseString(series.text)
+        if deParseString(title) in webPageTitle: #Checks to see if the series is being sold by the store
+            if (bookType == "M") and ("graphic" in webPageTitle):
+                #print("Found Manga")
+                return getURL(series["href"], True)
+            elif (bookType == "LN") and (webPageTitle.find("graphic") == -1):
+                #print("Found Light Novel")
+                return getURL(series["href"], True)             
+    return False
 
 #Main logic function that uses the input and scrapes the data into a csv file
-def getRobertsAnimeCornerStoreData(title):
+def getRobertsAnimeCornerStoreData(title, bookType):
     #Starts wevdriver to scrape edge chromium
     options = EdgeOptions()
     options.use_chromium = True
@@ -67,7 +73,7 @@ def getRobertsAnimeCornerStoreData(title):
     
     soup = BeautifulSoup(driver.page_source, "html.parser")
     
-    newPage = getDataPage(driver, title, soup)
+    newPage = getDataPage(driver, title, soup, bookType)
     if not newPage:
         print("Error!!!!! Invalid Series Title")
         return
@@ -95,7 +101,7 @@ def getRobertsAnimeCornerStoreData(title):
         
         #print("Title List Length: " + str(len(titleList)) + "\nPrice List Length: " + str(len(priceList)))
         for titles, prices in zip(titleList, priceList):
-            dataList.append([titles, prices.text, websiteName])
+            dataList.append([str(titles).replace(",", ""), prices.text, websiteName])
 
         csvFile = websiteName + ".csv"
         with open(csvFile, "w", newline = "", encoding = "utf-8") as file:
@@ -103,3 +109,4 @@ def getRobertsAnimeCornerStoreData(title):
             writeToFile.writerow(["Title", "Price", "Website"])
             writeToFile.writerows(dataList)
         return csvFile
+    
