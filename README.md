@@ -5,4 +5,4 @@ A side project I decided to do to start learning web scraping and using dif APIs
 
 
 MangaHabu V1
-- Scrape RightStufAnime and Robert's Anime Corner Store for manga and light novel data of a particular series that is given by the user. Then compare the data and ouput all of the volumes with there title, price, and website to a CSV file for the lowest volume prices
+- Scrape RightStufAnime and Robert's Anime Corner Store (maybe add more later) for manga and light novel data of a particular series that is given by the user. Then compare the data and ouput all of the volumes with there title, price, and website to a CSV file for the lowest volume prices
