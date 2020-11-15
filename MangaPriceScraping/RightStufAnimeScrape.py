@@ -64,7 +64,7 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
     driver.get(getPageURL(bookType, currPageNum, title))
     
     #Need to wait so the website can finish loading
-    time.sleep(10)
+    time.sleep(5)
 
     #Parse the HTML to start scraping for data
     soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -104,4 +104,5 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
         writeToFile = csv.writer(file)
         writeToFile.writerow(["Title", "Stock Status", "Price", "Website"])
         writeToFile.writerows(natsorted(dataFile)) #Sort data by title and write to the file
+    driver.quit()
     return csvFile

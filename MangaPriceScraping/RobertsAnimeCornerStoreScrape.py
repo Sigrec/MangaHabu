@@ -55,12 +55,9 @@ def getDataPage(driver, title, soup, bookType):
         webPageTitle = deParseString(series.text)
         if deParseString(title) in webPageTitle: #Checks to see if the series is being sold by the store
             if (bookType == "M") and ("graphic" in webPageTitle):
-                #print("Found Manga")
                 return getURL(series["href"], True)
             elif (bookType == "LN") and (webPageTitle.find("graphic") == -1):
-                #print("Found Light Novel")
-                return getURL(series["href"], True)             
-    return False
+                return getURL(series["href"], True)
 
 #Main logic function that uses the input and scrapes the data into a csv file
 def getRobertsAnimeCornerStoreData(title, bookType):
@@ -75,6 +72,7 @@ def getRobertsAnimeCornerStoreData(title, bookType):
     
     newPage = getDataPage(driver, title, soup, bookType)
     if not newPage:
+        print(title)
         print("Error!!!!! Invalid Series Title")
         return
     else:
@@ -109,4 +107,5 @@ def getRobertsAnimeCornerStoreData(title, bookType):
             writeToFile.writerow(["Title", "Price", "Website"])
             writeToFile.writerows(dataList)
         return csvFile
+    driver.quit()
     
