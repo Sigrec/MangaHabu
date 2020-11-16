@@ -36,10 +36,12 @@ def filterTitle(bookTitle):
     for char in [" ", "'", "!", "-"]: #Common non alphanumeric characters used in Light Novel & Manga titles
         if char in bookTitle:
             bookTitle = bookTitle.replace(char, "%" + hex(ord(char)).replace("0x", ""))
+    print(bookTitle)
     return bookTitle
 
 #Gets the URL to for the Light Novel or Manga the user wants
 def getPageURL(bookType, currPageNum, bookTitle):
+    print(bookTitle)
     pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(checkBookType(bookType), currPageNum, filterTitle(bookTitle))
     print(pageURL)
     return pageURL

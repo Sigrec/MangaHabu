@@ -4,6 +4,7 @@ from RobertsAnimeCornerStoreScrape import getRobertsAnimeCornerStoreData
 from multiprocessing import Process
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QButtonGroup, QGroupBox
+from PyQt5.QtGui import QFont
 import sys
 import time
 import csv
@@ -20,7 +21,7 @@ def getRightStufData(userMemberStatus, userBookType, userBookTitle):
 def getRobertsData(userBookTitle, bookType):
     getRobertsAnimeCornerStoreData(userBookTitle, bookType)
     
-def getPriceData(userBookTitle, userBookType):
+def getPriceData(gotAnimeMemberStatus, userBookTitle, userBookType):
     global count
     global exitCode1
     global exitCode2
@@ -30,7 +31,7 @@ def getPriceData(userBookTitle, userBookType):
     
     if "RS" in websiteList:
         #userMemberStatus = input((R"Are You a GotAnime Member (T/True or F/False): "))
-        proc1 = Process(target = getRightStufData, args = (False, userBookType, userBookTitle))
+        proc1 = Process(target = getRightStufData, args = (gotAnimeMemberStatus, userBookType, userBookTitle))
         proc1.start()
         exitCode1 = proc1.exitcode
     
@@ -44,7 +45,7 @@ class Ui_MangaScrapeGUI(object):
         MangaScrapeGUI.setObjectName("MangaScrapeGUI")
         MangaScrapeGUI.resize(319, 230)
         MangaScrapeGUI.setMinimumSize(QtCore.QSize(319, 230))
-        MangaScrapeGUI.setMaximumSize(QtCore.QSize(319, 270))
+        MangaScrapeGUI.setMaximumSize(QtCore.QSize(319, 230))
         MangaScrapeGUI.setAutoFillBackground(False)
         
         self.MangaScrapeWidget = QtWidgets.QWidget(MangaScrapeGUI)
@@ -55,6 +56,7 @@ class Ui_MangaScrapeGUI(object):
         self.MangaScrapeWidget.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.MangaScrapeWidget.setAcceptDrops(False)
         self.MangaScrapeWidget.setAccessibleName("")
+        self.MangaScrapeWidget.setFont(QFont('Arial', 8)) 
         
         self.MangaScrapeWidget.setObjectName("MangaScrapeWidget")
         self.seriesTitleLabel = QtWidgets.QLabel(self.MangaScrapeWidget)
@@ -88,6 +90,13 @@ class Ui_MangaScrapeGUI(object):
         self.rightstufCheckBox.setObjectName("rightstufCheckBox")
         self.rightstufCheckBox.stateChanged.connect(self.getRSWebsite)
         
+        memberStatus = False
+        self.gotAnimeMemberStatus = QtWidgets.QCheckBox(self.MangaScrapeWidget)
+        self.gotAnimeMemberStatus.setGeometry(QtCore.QRect(100, 145, 140, 17))
+        self.gotAnimeMemberStatus.setObjectName("gotAnimeMemberStatus")
+        self.gotAnimeMemberStatus.stateChanged.connect(self.getMemberStatus)
+        self.gotAnimeMemberStatus.hide()
+        
         self.robertsCheckBox = QtWidgets.QCheckBox(self.MangaScrapeWidget)
         self.robertsCheckBox.setGeometry(QtCore.QRect(140, 120, 161, 17))
         self.robertsCheckBox.setObjectName("robertsCheckBox")
@@ -105,7 +114,7 @@ class Ui_MangaScrapeGUI(object):
         self.runScrape.setObjectName("pushbutton")
         MangaScrapeGUI.setCentralWidget(self.MangaScrapeWidget)
         self.runScrape.clicked.connect(self.getPrices)
-        #self.runScrape.clicked.connect(self.progressBarUpdate)
+        #self.runScrape.clicked.connect(self.runProgressBar)
         
         self.statusbar = QtWidgets.QStatusBar(MangaScrapeGUI)
         self.statusbar.setObjectName("statusbar")
@@ -121,34 +130,61 @@ class Ui_MangaScrapeGUI(object):
         self.bookTypeMangaButton.setText(_translate("MangaScrapeGUI", "Manga"))
         self.bookTypeNovelButton.setText(_translate("MangaScrapeGUI", "Light Novel"))
         self.rightstufCheckBox.setText(_translate("MangaScrapeGUI", "RightStufAnime"))
+        self.gotAnimeMemberStatus.setText(_translate("MangaScrapeGUI", "GotAnime Member"))
         self.robertsCheckBox.setText(_translate("MangaScrapeGUI", "Roberts Anime Corner Store"))
         self.progressBar.setFormat(_translate("MangaScrapeGUI", "%p%"))
         self.runScrape.setText(_translate("MangaScrapeGUI", "Run"))
     
+    #Determines the book type (manga or light novel) the user wants data for
     def getBookType(self, button):
         if button.text() == "Light Novel":
             self.bookType = "LN"
         elif button.text() == "Manga":
             self.bookType = "M"
     
+    #Determines whether the user wants to scrape RightStufAnime and if so resize the window for the member status checkbox
     def getRSWebsite(self):
-        if  self.rightstufCheckBox.isChecked():
+        if self.rightstufCheckBox.isChecked():
+            self.gotAnimeMemberStatus.show()
+            self.runScrape.setGeometry(QtCore.QRect(140, 170, 41, 31))
+            self.progressBar.setGeometry(QtCore.QRect(100, 210, 121, 23))
+            MangaScrapeGUI.setMinimumSize(QtCore.QSize(319, 250))
+            MangaScrapeGUI.setMaximumSize(QtCore.QSize(319, 250))
             websiteList.append("RS")
         elif not self.rightstufCheckBox.isChecked():
+            self.gotAnimeMemberStatus.hide()
+            self.runScrape.setGeometry(QtCore.QRect(140, 150, 41, 31))
+            self.progressBar.setGeometry(QtCore.QRect(100, 190, 121, 23))
+            MangaScrapeGUI.setMinimumSize(QtCore.QSize(319, 230))
+            MangaScrapeGUI.setMaximumSize(QtCore.QSize(319, 230))
             websiteList.remove("RS")
-        
+
+    #Determines whether the user is a GotAnime member if they want to scrape RightStufAnime
+    def getMemberStatus(self):
+        if self.gotAnimeMemberStatus.isChecked():
+            self.memberStatus = True
+        elif not self.gotAnimeMemberStatus.isChecked():
+            self.memberStatus = False
+    
+    #Determines whether the user wants to scrape Roberts Anime Corner Store  
     def getRobertWebsite(self):
         if self.robertsCheckBox.isChecked():
             websiteList.append("R")
         elif not self.robertsCheckBox.isChecked():
             websiteList.remove("R")
-            
+    
+    #Runs the progress by incrementing counter ever 3/10 oth a second
+    def runProgressBar(self):
+        for x in range(101):
+            time.sleep(25 / 100)
+            self.progressBar.setValue(x)
+    
+    #Runs the manga scrape script to get data    
     def getPrices(self):
-        if (len(self.bookType) == 0) or (not self.seriesTitleInput.text()) or (websiteList == []):
+        if self.runScrape.isChecked() and ((len(self.bookType) == 0) or (not self.seriesTitleInput.text()) or (websiteList == [])): #Check to see if the user hit run, picked a book type, entered a series title, and picked a website to scrape
             print("Error!!!")
         else:
-            self.runScrape.setCheckable(True)
-            getPriceData(self.seriesTitleInput.text(), self.bookType)
+            getPriceData(self.memberStatus, self.seriesTitleInput.text(), self.bookType)
             
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
