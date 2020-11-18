@@ -36,12 +36,10 @@ def filterTitle(bookTitle):
     for char in [" ", "'", "!", "-"]: #Common non alphanumeric characters used in Light Novel & Manga titles
         if char in bookTitle:
             bookTitle = bookTitle.replace(char, "%" + hex(ord(char)).replace("0x", ""))
-    print(bookTitle)
     return bookTitle
 
 #Gets the URL to for the Light Novel or Manga the user wants
 def getPageURL(bookType, currPageNum, bookTitle):
-    print(bookTitle)
     pageURL = R"https://www.rightstufanime.com/category/{}?page={}&show=96&keywords={}".format(checkBookType(bookType), currPageNum, filterTitle(bookTitle))
     print(pageURL)
     return pageURL
@@ -79,7 +77,7 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
     
     #Check to see if the title given by the user generates a valid URL for RightStufAnime
     if not titleList:
-        print("Error!!! Invalid Title, Use English Title Variant w/ Approprate Spacing & Capitalization")
+        print("Error!!! Invalid Title, Use English Title Variant w/ Appropriate Spacing & Capitalization")
         return
     else: #If the URL is a "valid" RightStufAnime website URL
         websiteName = "RightStufAnime"
@@ -93,18 +91,27 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
                     priceText = "$" + str(round((priceVal - (priceVal * gotAnimeDiscount)), 2)) #Add discount
                 else:
                     priceText = price.text
-                dataFile.append([fullTitle.text, stockStatus.text, priceText, websiteName])
+                
+                stockCheck = stockStatus.text
+                if stockCheck.find("Out of Stock") != -1:
+                    stockCheck = "OOS"
+                elif stockCheck.find("No Longer Available") != -1:
+                    stockCheck = "OOP"
+                else:
+                    stockCheck = "Available"
+                dataFile.append([fullTitle.text, priceText, stockCheck])
                 
         #Check to see if there is another page
         if nextPageButton != None:
             currPageNum += 1
+            print(title)
             getRightStufAnimeData(memberStatus, title, bookType, currPageNum)
-            
+    
     #Initialize the a CSV to write into w/ appropiate headers
     csvFile = websiteName + "Data.csv"
     with open (csvFile, "w", newline = "", encoding = "utf-8") as file:
         writeToFile = csv.writer(file)
-        writeToFile.writerow(["Title", "Stock Status", "Price", "Website"])
+        writeToFile.writerow(["Title", "Price", "Stock Status"])
         writeToFile.writerows(natsorted(dataFile)) #Sort data by title and write to the file
     driver.quit()
     return csvFile

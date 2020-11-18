@@ -5,13 +5,12 @@ from multiprocessing import Process
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QButtonGroup, QGroupBox
 from PyQt5.QtGui import QFont
+from table import UI_DataTablesGUI
 import sys
 import time
 import csv
 
 websiteList = []
-count = 0
-exitCode1, exitCode2 = 1, 1
 
 #Gets the data from the RightStufAnime website
 def getRightStufData(userMemberStatus, userBookType, userBookTitle):
@@ -22,9 +21,6 @@ def getRobertsData(userBookTitle, bookType):
     getRobertsAnimeCornerStoreData(userBookTitle, bookType)
     
 def getPriceData(gotAnimeMemberStatus, userBookTitle, userBookType):
-    global count
-    global exitCode1
-    global exitCode2
     # websites = list(map(str, input(R"What Websites Do You want to Compare Data For: ").split()))
     # userBookTitle = input(R"Enter Series Title: ")
     # userBookType = input(R"Enter Book Type (LN or M): ")
@@ -33,12 +29,12 @@ def getPriceData(gotAnimeMemberStatus, userBookTitle, userBookType):
         #userMemberStatus = input((R"Are You a GotAnime Member (T/True or F/False): "))
         proc1 = Process(target = getRightStufData, args = (gotAnimeMemberStatus, userBookType, userBookTitle))
         proc1.start()
-        exitCode1 = proc1.exitcode
     
     if "R" in websiteList:
         proc2 = Process(target = getRobertsData, args = (userBookTitle, userBookType))
         proc2.start()
-        exitCode2 = proc2.exitcode
+    
+    print(proc2.exitcode)
         
 class Ui_MangaScrapeGUI(object):
     def setupUi(self, MangaScrapeGUI):
@@ -114,7 +110,7 @@ class Ui_MangaScrapeGUI(object):
         self.runScrape.setObjectName("pushbutton")
         MangaScrapeGUI.setCentralWidget(self.MangaScrapeWidget)
         self.runScrape.clicked.connect(self.getPrices)
-        #self.runScrape.clicked.connect(self.runProgressBar)
+        #self.runScrape.clicked.connect(self.printData)
         
         self.statusbar = QtWidgets.QStatusBar(MangaScrapeGUI)
         self.statusbar.setObjectName("statusbar")
@@ -178,6 +174,12 @@ class Ui_MangaScrapeGUI(object):
         for x in range(101):
             time.sleep(25 / 100)
             self.progressBar.setValue(x)
+            
+    def printData(self):
+        self.window = QtWidgets.QMainWindow()
+        self.ui = UI_DataTablesGUI()
+        self.ui.setupUi(self.window)
+        self.window.show()
     
     #Runs the manga scrape script to get data    
     def getPrices(self):
@@ -185,6 +187,7 @@ class Ui_MangaScrapeGUI(object):
             print("Error!!!")
         else:
             getPriceData(self.memberStatus, self.seriesTitleInput.text(), self.bookType)
+            
             
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
@@ -194,7 +197,6 @@ if __name__ == "__main__":
     ui.setupUi(MangaScrapeGUI)
     MangaScrapeGUI.show()
     sys.exit(app.exec_())
-    
           
             
                     
