@@ -1,8 +1,5 @@
 # MangaHabu
-Website designed for Manga/Light Novel collectors in mind!
-
-A side project I decided to do to start learning web scraping and using dif APIs in general as well as web dev stuff. Also to get better at Python and JS Frameworks
-
+A side project I decided to do to start learning frameworks and just practice in general as well as web dev stuff. Also to get better at Python and JS Frameworks
 
 MangaHabu V1
 - Scrape RightStufAnime and Robert's Anime Corner Store (maybe add more later) for manga and light novel data of a particular series that is given by the user. 

@@ -1,11 +1,11 @@
 #
 
-from msedge.selenium_tools import Edge, EdgeOptions
-from bs4 import BeautifulSoup
 import string
 import csv
-import re
 import time
+import re
+from msedge.selenium_tools import Edge, EdgeOptions
+from bs4 import BeautifulSoup
 
 #Gets the URLs needed to scrape the data from using the user input series title
 def getURL(title, nextPage):
@@ -82,11 +82,11 @@ def getRobertsAnimeCornerStoreData(title, bookType):
         #Wait for the web page to finish loading
         time.sleep(5)
         
+        #Start parsing the web pages html and css
         soup2 = BeautifulSoup(driver.page_source, "html.parser")
         
         #Get the Title and Price of each manga or light novel
         dataList, titleList = [], []
-        websiteName = "AnimeCornerStore"
         titleParse = soup2.find_all("tr", {"valign" :"top"})[1:] #Remove first element cause it pulls unwanted text
         priceList = soup2.select('font[color="#ffcc33"]')[1::2] #[1::2] to remove the RACS Price text (every odd element in the list)
         
@@ -95,16 +95,21 @@ def getRobertsAnimeCornerStoreData(title, bookType):
             seriesTitle = bookTitle.find("font", {"size" : "2"}).b.text
             if seriesTitle != " ":
                 titleList.append(seriesTitle)
-        titleParse.clear() #Remove list from memory as we don't need it anymore
+        del titleParse #Remove list from memory as we don't need it anymore
         
-        #print("Title List Length: " + str(len(titleList)) + "\nPrice List Length: " + str(len(priceList)))
+        stockStatus = ""
         for titles, prices in zip(titleList, priceList):
-            dataList.append([str(titles).replace(",", ""), prices.text, websiteName])
+            specTitle = str(titles).replace(",", "")
+            if specTitle.find("Pre Order") != -1:
+                stockStatus = "Pre-Order"
+            else:
+                stockStatus = "Available"
+            dataList.append([specTitle, prices.text, stockStatus])
 
-        csvFile = websiteName + ".csv"
+        csvFile = "AnimeCornerStore.csv"
         with open(csvFile, "w", newline = "", encoding = "utf-8") as file:
             writeToFile = csv.writer(file)
-            writeToFile.writerow(["Title", "Price", "Website"])
+            writeToFile.writerow(["Title", "Price", "Stock Status"])
             writeToFile.writerows(dataList)
         return csvFile
     driver.quit()

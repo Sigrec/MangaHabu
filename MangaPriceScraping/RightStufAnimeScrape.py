@@ -1,12 +1,12 @@
 #Scrapes the RightStufAnime website for a manga or light novel series and prints the stock stats, title, and current price
 
-from msedge.selenium_tools import Edge, EdgeOptions
-from bs4 import BeautifulSoup
-from natsort import natsorted
 import string
 import csv
 import re
 import time
+from msedge.selenium_tools import Edge, EdgeOptions
+from bs4 import BeautifulSoup
+from natsort import natsorted
 
 #Empty list that holds final data
 dataFile = []
@@ -94,9 +94,11 @@ def getRightStufAnimeData(memberStatus, title, bookType, currPageNum):
                 
                 stockCheck = stockStatus.text
                 if stockCheck.find("Out of Stock") != -1:
-                    stockCheck = "OOS"
+                    stockCheck = "Out of Stock"
                 elif stockCheck.find("No Longer Available") != -1:
-                    stockCheck = "OOP"
+                    stockCheck = "Out of Print"
+                elif stockCheck.find("Pre-Order") != -1:
+                    stockCheck = "Pre-Order"
                 else:
                     stockCheck = "Available"
                 dataFile.append([fullTitle.text, priceText, stockCheck])
