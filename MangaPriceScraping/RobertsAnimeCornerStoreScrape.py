@@ -5,6 +5,7 @@ import csv
 import time
 import re
 from msedge.selenium_tools import Edge, EdgeOptions
+from DataTableWidget import UI_DataTablesGUI
 from bs4 import BeautifulSoup
 
 #Gets the URLs needed to scrape the data from using the user input series title
@@ -53,7 +54,7 @@ def getDataPage(driver, title, soup, bookType):
     findSeries = soup.find_all("a", href=True)[1::2][:-19] #[1::2][:-19] Removes all none titles
     for series in findSeries:
         webPageTitle = deParseString(series.text)
-        if deParseString(title) in webPageTitle: #Checks to see if the series is being sold by the store
+        if deParseString(title) in deParseString(webPageTitle): #Checks to see if the series is being sold by the store
             if (bookType == "M") and ("graphic" in webPageTitle):
                 return getURL(series["href"], True)
             elif (bookType == "LN") and (webPageTitle.find("graphic") == -1):
@@ -111,6 +112,6 @@ def getRobertsAnimeCornerStoreData(title, bookType):
             writeToFile = csv.writer(file)
             writeToFile.writerow(["Title", "Price", "Stock Status"])
             writeToFile.writerows(dataList)
-        return csvFile
-    driver.quit()
+        #TableGUI.robertsDataTable.setItem(numRows, 0, QtWidgets.QTableWidgetItem(str(dataList[0])))
+        return dataList
     

@@ -6,6 +6,10 @@ class UI_DataTablesGUI(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1036, 753)
+        
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        
         self.rightStufDataTable = QtWidgets.QTableWidget(Form)
         #self.rightStufDataTable.horizontalHeader().setStretchLastSection(True)
         self.rightStufDataTable.setGeometry(QtCore.QRect(50, 70, 441, 600))
@@ -19,13 +23,13 @@ class UI_DataTablesGUI(object):
         
         self.rightStufDataTitle = QtWidgets.QLabel(Form)
         self.rightStufDataTitle.setGeometry(QtCore.QRect(170, 29, 201, 31))
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        
         self.rightStufDataTitle.setFont(font)
         self.rightStufDataTitle.setObjectName("rightStufDataTitle")
+        
         self.robertsDataTitle = QtWidgets.QLabel(Form)
         self.robertsDataTitle.setGeometry(QtCore.QRect(620, 30, 321, 31))
+        self.robertsDataTitle.setFont(font)
+        self.robertsDataTitle.setObjectName("robertsDataTitle")
         
         self.printTypeLabel = QtWidgets.QLabel(Form)
         self.printTypeLabel.setGeometry(QtCore.QRect(425, 675, 231, 25))
@@ -36,12 +40,6 @@ class UI_DataTablesGUI(object):
         self.printTypeInput.setPlaceholderText("Search...")
         self.printTypeInput.textChanged.connect(self.searchData)
         self.printTypeInput.setObjectName("specificPrintType")
-        
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        
-        self.robertsDataTitle.setFont(font)
-        self.robertsDataTitle.setObjectName("robertsDataTitle")
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -55,7 +53,7 @@ class UI_DataTablesGUI(object):
             self.rightStufDataTable.setCurrentItem(foundTitleOne)
             self.robertsDataTable.setCurrentItem(foundTitleTwo)
     
-    def convertRightStufData(self):
+    def convertRightStufData(self, dataList):
         with open("RightStufAnimeData.csv", "r") as dataFile:
             self.rightStufDataTable.setRowCount(sum(1 for row in csv.reader(dataFile)))
         
@@ -68,8 +66,17 @@ class UI_DataTablesGUI(object):
                 self.rightStufDataTable.setItem(numRows, 1, QtWidgets.QTableWidgetItem(str(dataList[1])))
                 self.rightStufDataTable.setItem(numRows, 2, QtWidgets.QTableWidgetItem(str(dataList[2])))
                 numRows += 1
+        
+        self.rightStufDataTable.setRowCount(len(dataList))
+        numRows = 0
+        for dataRow in rightStufData:
+            dataList = list(dataRow)
+            self.rightStufDataTable.setItem(numRows, 0, QtWidgets.QTableWidgetItem(str(dataList[0])))
+            self.rightStufDataTable.setItem(numRows, 1, QtWidgets.QTableWidgetItem(str(dataList[1])))
+            self.rightStufDataTable.setItem(numRows, 2, QtWidgets.QTableWidgetItem(str(dataList[2])))
+            numRows += 1
     
-    def convertRobertsData(self):
+    def convertRobertsData(self, dataList):
         with open("AnimeCornerStore.csv", "r") as dataFile:
             self.robertsDataTable.setRowCount(sum(1 for row in csv.reader(dataFile)))
         

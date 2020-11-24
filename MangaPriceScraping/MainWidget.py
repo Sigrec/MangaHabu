@@ -1,6 +1,6 @@
 #Master scraping file that asks the user for input and what websites he wants to scrape and compares the data
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QButtonGroup, QGroupBox
+from PyQt5.QtWidgets import QButtonGroup, QGroupBox, QMessageBox
 from PyQt5.QtGui import QFont
 from DataTableWidget import UI_DataTablesGUI
 from MasterScrape import getPriceData
@@ -13,6 +13,10 @@ class Ui_MangaScrapeGUI(object):
         MangaScrapeGUI.setMinimumSize(QtCore.QSize(319, 230))
         MangaScrapeGUI.setMaximumSize(QtCore.QSize(319, 230))
         MangaScrapeGUI.setAutoFillBackground(False)
+        
+        self.ErrorMsgWidget = QMessageBox()
+        self.ErrorMsgWidget.setIcon(QMessageBox.Critical)
+        self.ErrorMsgWidget.setWindowTitle("Error")
         
         self.MangaScrapeWidget = QtWidgets.QWidget(MangaScrapeGUI)
         self.MangaScrapeWidget.setEnabled(True)
@@ -107,6 +111,7 @@ class Ui_MangaScrapeGUI(object):
         self.progressBar.setFormat(_translate("MangaScrapeGUI", "%p%"))
         self.runScrape.setText(_translate("MangaScrapeGUI", "Run"))
         self.printDataButton.setText(_translate("MangaScrapeGUI", "Show"))
+        self.ErrorMsgWidget.setText(_translate("MangaScrapeGUI", "Error"))
     
     #Determines the book type (manga or light novel) the user wants data for
     def getBookType(self, button):
@@ -122,7 +127,7 @@ class Ui_MangaScrapeGUI(object):
         elif not self.gotAnimeMemberStatus.isChecked():
             self.memberStatus = False
     
-    #Determines whether the user wants to scrape RightStufAnime and if so resize the window for the member status checkbox
+    #Determines whether the user wants to scrape RightStufAnime and if so, resize the window for the member status checkbox
     def getRSWebsite(self):
         if self.rightstufCheckBox.isChecked():
             MangaScrapeGUI.setMinimumSize(QtCore.QSize(319, 250))
@@ -164,12 +169,21 @@ class Ui_MangaScrapeGUI(object):
     
     #Runs the manga scrape script to get data    
     def getPrices(self):
-        if self.runScrape.isChecked() and ((len(self.bookType) == 0) or (not self.seriesTitleInput.text()) or (websiteList == [])): #Check to see if the user hit run, picked a book type, entered a series title, and picked a website to scrape
-            print("Error!!!")
+        if self.websiteList == []:
+            self.ErrorMsgWidget.setText("No Websites Checked")
+            self.ErrorMsgWidget.setInformativeText("Need to select at least one website to run the scrape")
+            self.ErrorMsgWidget.show()
+        elif len(self.bookType) == 0:
+            self.ErrorMsgWidget.setText("No Book Type Selected")
+            self.ErrorMsgWidget.setInformativeText("Need to select whether the series is a manga or a light novel")
+            self.ErrorMsgWidget.show()
+        elif not self.seriesTitleInput.text():
+            self.ErrorMsgWidget.setText("Series Title Blank")
+            self.ErrorMsgWidget.setInformativeText("Need to enter a series title into the text field")
+            self.ErrorMsgWidget.show()
         else:
             getPriceData(self.memberStatus, self.seriesTitleInput.text(), self.bookType, self.websiteList)
-            
-            
+                      
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle("Fusion")

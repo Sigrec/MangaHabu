@@ -1,6 +1,6 @@
 from RightStufAnimeScrape import getRightStufAnimeData
 from RobertsAnimeCornerStoreScrape import getRobertsAnimeCornerStoreData
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 #Gets the data from the RightStufAnime website
 def getRightStufData(userMemberStatus, userBookType, userBookTitle):
@@ -12,6 +12,7 @@ def getRobertsData(userBookTitle, bookType):
 
 #Gets the price data from the websites the user wants
 def getPriceData(gotAnimeMemberStatus, userBookTitle, userBookType, websiteList):
+    Q = Queue()
     if "RS" in websiteList:
         proc1 = Process(target = getRightStufData, args = (gotAnimeMemberStatus, userBookType, userBookTitle))
         proc1.start()
@@ -19,3 +20,4 @@ def getPriceData(gotAnimeMemberStatus, userBookTitle, userBookType, websiteList)
     if "R" in websiteList:
         proc2 = Process(target = getRobertsData, args = (userBookTitle, userBookType))
         proc2.start()
+    
